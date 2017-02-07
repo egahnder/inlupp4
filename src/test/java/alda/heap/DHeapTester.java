@@ -15,7 +15,7 @@ public class DHeapTester {
 	 * Detta test kontrollerar att er kod implementerar en fungerande
 	 * prioritetskö. Detta test ska naturligtvis fungera.
 	 */
-	@Test
+    	@Test
 	public void testFunctionality() {
 		Random rnd = new Random();
 		PriorityQueue<Integer> oracle = new PriorityQueue<Integer>();
@@ -26,7 +26,6 @@ public class DHeapTester {
 			int tal = rnd.nextInt(1000);
 			heap.insert(tal);
 			oracle.add(tal);
-
 			while (!heap.isEmpty() && rnd.nextBoolean()) {
 				assertEquals(oracle.poll(), heap.deleteMin());
 			}
@@ -34,6 +33,76 @@ public class DHeapTester {
 			assertEquals(oracle.isEmpty(), heap.isEmpty());
 		}
 	}
+
+	@Test
+    public void findSmallest(){
+        heap.insert(1);
+        heap.insert(2);
+        heap.insert(3);
+        heap.insert(5);
+        int ettan = heap.findMin();
+        assertEquals(ettan, 1);
+    }
+
+    @Test
+    public void findSmallest2(){
+        heap.insert(4);
+        heap.insert(3);
+        heap.insert(2);
+        heap.insert(1);
+        int ettan = heap.findMin();
+        assertEquals(ettan, 1);
+    }
+
+    @Test
+    public void findSmallest3(){
+        heap.insert(4);
+        heap.insert(5);
+        heap.insert(2);
+        heap.insert(1);
+        int ettan = heap.deleteMin();
+        assertEquals(ettan, 1);
+        int tvåan = heap.deleteMin();
+        assertEquals(tvåan, 2);
+        int fyran = heap.deleteMin();
+        assertEquals(fyran, 4);
+        int femman = heap.deleteMin();
+        assertEquals(femman, 5);
+        heap.insert(4);
+        heap.insert(5);
+        heap.insert(2);
+        heap.insert(1);
+        ettan = heap.deleteMin();
+        assertEquals(ettan, 1);
+        tvåan = heap.deleteMin();
+        assertEquals(tvåan, 2);
+        fyran = heap.deleteMin();
+        assertEquals(fyran, 4);
+        femman = heap.deleteMin();
+        assertEquals(femman, 5);
+    }
+    @Test
+    public void deleteSmallest3(){
+        heap.insert(4);
+        heap.insert(5);
+        heap.insert(2);
+        heap.insert(1);
+        int ettan = heap.deleteMin();
+        assertEquals(ettan, 1);
+    }
+
+    @Test
+    public void findSmallest4(){
+        heap.insert(7);
+        heap.insert(6);
+        heap.insert(5);
+        heap.insert(4);
+        heap.insert(5);
+        heap.insert(2);
+        heap.insert(1);
+        int ettan = heap.findMin();
+        assertEquals(ettan, 1);
+    }
 
 	/**
 	 * Er heap ska ha två konstruktorer: en som inte tar några parametrar och
@@ -128,7 +197,7 @@ public class DHeapTester {
 	}
 	*/
 
-	/**
+    /*
 	 * Även detta test förutsätter att ni gör en metod för att räkna ut det
 	 * första barnets index och kan ignoreras om ni inte gör det.
 	 */
@@ -137,13 +206,13 @@ public class DHeapTester {
 	public void testTooLowChildIndex() {
 		heap.firstChildIndex(0);
 	}
-
+	*/
 	private void testValues(Integer... expected) {
 		assertEquals(expected.length, heap.size());
 		for (int n = 0; n < expected.length; n++)
 			assertEquals(expected[n], heap.get(n + 1));
 	}
-*/
+
 	/**
 	 * Detta test kräver att arrayen i heapen görs tillgänglig via ett par
 	 * metoder. Metoden size är inte mycket att säga om, den borde antagligen
@@ -159,7 +228,7 @@ public class DHeapTester {
 	 */
 	/*
 	@Test
-
+	**/
 	public void testContent() {
 		testValues();
 		heap.insert(17);
@@ -192,6 +261,4 @@ public class DHeapTester {
 		assertEquals(5, (int) heap.deleteMin());
 		testValues(10, 17, 70, 12, 100, 51, 52, 23);
 	}
-	*/
-
 }

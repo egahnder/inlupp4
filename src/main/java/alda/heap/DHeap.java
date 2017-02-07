@@ -16,163 +16,161 @@ package alda.heap;
 //Throws UnderflowException as appropriate
 
 /**
-* Implements a binary heap.
-* Note that all "matching" is based on the compareTo method.
-* @author Mark Allen Weiss
-*/
+ * Implements a binary heap.
+ * Note that all "matching" is based on the compareTo method.
+ * @author Mark Allen Weiss
+ */
+
+
 public class DHeap<AnyType extends Comparable<? super AnyType>>
 {
- /**
-  * Construct the binary heap.
-  */
- public DHeap( )
- {
-     this( DEFAULT_CAPACITY );
- }
+    private static final int DEFAULT_ARY = 2;
+    private int ary = 0;
+    private int currentSize;      // Number of elements in heap
+    private AnyType [ ] array; // The heap array
 
- /**
-  * Construct the binary heap.
-  * @param capacity the capacity of the binary heap.
-  */
- public DHeap(int capacity )
- {
-     currentSize = 0;
-     array = (AnyType[]) new Comparable[ capacity + 1 ];
- }
- 
- /**
-  * Construct the binary heap given an array of items.
-  */
- public DHeap(AnyType [ ] items )
- {
-         currentSize = items.length;
-         array = (AnyType[]) new Comparable[ ( currentSize + 2 ) * 11 / 10 ];
+    /**
+     * Construct the binary heap.
+     */
+    public DHeap( )
+    {
+        this(DEFAULT_ARY);
+    }
 
-         int i = 1;
-         for( AnyType item : items )
-             array[ i++ ] = item;
-         buildHeap( );
- }
+    /**
+     * Construct the binary heap.
+     * @param capacity the capacity of the binary heap.
+     */
+    public DHeap(int ary)
+    {
+        if(ary < 2){
+            throw new IllegalArgumentException();
+        }
+        else{
+            currentSize = 0;
+            array = (AnyType[]) new Comparable[ary+1];
+            this.ary = ary;
+        }
+    }
 
- /**
-  * Insert into the priority queue, maintaining heap order.
-  * Duplicates are allowed.
-  * @param x the item to insert.
-  */
- public void insert( AnyType x )
- {
-     if( currentSize == array.length - 1 )
-         enlargeArray( array.length * 2 + 1 );
+    // Test program
+    public static void main( String [ ] args )
+    {
+    }
 
-         // Percolate up
-     int hole = ++currentSize;
-     for( array[ 0 ] = x; x.compareTo( array[ hole / 2 ] ) < 0; hole /= 2 )
-         array[ hole ] = array[ hole / 2 ];
-     array[ hole ] = x;
- }
+    /**
+     * Insert into the priority queue, maintaining heap order.
+     * Duplicates are allowed.
+     * @param x the item to insert.
+     */
+    public void insert( AnyType x ) {
+        if( currentSize == array.length - 1 )
+            enlargeArray( array.length * 2 + 1 );
 
+        int parentIndex = (currentSize-1)/ary;
+        int childIndex = currentSize;
+        array[childIndex] = x;
+        while(parentIndex >= 0 && array[parentIndex].compareTo(array[childIndex]) > 0){
+            swap(parentIndex, childIndex);
+            childIndex = parentIndex;
+            parentIndex = (childIndex-1)/ary;
+        }
+        currentSize++;
+    }
 
- private void enlargeArray( int newSize )
- {
-         AnyType [] old = array;
-         array = (AnyType []) new Comparable[ newSize ];
-         for( int i = 0; i < old.length; i++ )
-             array[ i ] = old[ i ];        
- }
- 
- /**
-  * Find the smallest item in the priority queue.
-  * @return the smallest item, or throw an UnderflowException if empty.
-  */
- public AnyType findMin( )
- {
-     if( isEmpty( ) )
-         throw new UnderflowException("isEmpty" );
-     return array[ 1 ];
- }
+    /**
+     * Find the smallest item in the priority queue.
+     * @return the smallest item, or throw an UnderflowException if empty.
+     */
+    public AnyType findMin( )
+    {
+        if( isEmpty( ) )
+            throw new UnderflowException("isEmpty" );
+        return array[0];
+    }
 
- /**
-  * Remove the smallest item from the priority queue.
-  * @return the smallest item, or throw an UnderflowException if empty.
-  */
- public AnyType deleteMin( )
- {
-     if( isEmpty( ) )
-         throw new UnderflowException("isEmpty" );
+    /**
+     * Remove the smallest item from the priority queue.
+     * @return the smallest item, or throw an UnderflowException if empty.
+     */
+    public AnyType deleteMin( )
+    {
+        if( isEmpty( ) )
+            throw new UnderflowException("isEmpty" );
 
-     AnyType minItem = findMin( );
-     array[ 1 ] = array[ currentSize-- ];
-     percolateDown( 1 );
+        AnyType minItem = findMin();
+        array[0] = array[currentSize-1];
+        currentSize--;
+        if(currentSize > 0){
+            percolateDown(0);
+        }
+        return minItem;
+    }
 
-     return minItem;
- }
+    /**
+     * Test if the priority queue is logically empty.
+     * @return true if empty, false otherwise.
+     */
+    public boolean isEmpty( )
+    {
+        return currentSize == 0;
+    }
 
- /**
-  * Establish heap order property from an arbitrary
-  * arrangement of items. Runs in linear time.
-  */
- private void buildHeap( )
- {
-     for( int i = currentSize / 2; i > 0; i-- )
-         percolateDown( i );
- }
+    public int size(){
+        return currentSize;
+    }
 
- /**
-  * Test if the priority queue is logically empty.
-  * @return true if empty, false otherwise.
-  */
- public boolean isEmpty( )
- {
-     return currentSize == 0;
- }
+    public AnyType get(int index){ return array[index]; }
 
- /**
-  * Make the priority queue logically empty.
-  */
- public void makeEmpty( )
- {
-     currentSize = 0;
- }
+    /**
+     * Make the priority queue logically empty.
+     */
+    public void makeEmpty( )
+    {
+        currentSize = 0;
+    }
 
- private static final int DEFAULT_CAPACITY = 10;
+    private void swap(int first, int second){
+        AnyType tmp = array[first];
+        array[first] = array[second];
+        array[second] = tmp;
+    }
 
- private int currentSize;      // Number of elements in heap
- private AnyType [ ] array; // The heap array
+    private void enlargeArray( int newSize )
+    {
+        AnyType [] old = array;
+        array = (AnyType []) new Comparable[ newSize ];
+        for( int i = 0; i < old.length; i++ )
+            array[ i ] = old[ i ];
+    }
 
- /**
-  * Internal method to percolate down in the heap.
-  * @param hole the index at which the percolate begins.
-  */
- private void percolateDown( int hole )
- {
-     int child;
-     AnyType tmp = array[ hole ];
+    /**
+     * Establish heap order property from an arbitrary
+     * arrangement of items. Runs in linear time.
+     */
+    private void buildHeap( )
+    {
+        for( int i = currentSize / 2; i > 0; i-- )
+            percolateDown( i );
+    }
 
-     for( ; hole * 2 <= currentSize; hole = child )
-     {
-         child = hole * 2;
-         if( child != currentSize &&
-                 array[ child + 1 ].compareTo( array[ child ] ) < 0 )
-             child++;
-         if( array[ child ].compareTo( tmp ) < 0 )
-             array[ hole ] = array[ child ];
-         else
-             break;
-     }
-     array[ hole ] = tmp;
- }
-
-     // Test program
- public static void main( String [ ] args )
- {
-     int numItems = 10000;
-     alda.heap.DHeap<Integer> h = new alda.heap.DHeap<>( );
-     int i = 37;
-
-     for( i = 37; i != 0; i = ( i + 37 ) % numItems )
-         h.insert( i );
-     for( i = 1; i < numItems; i++ )
-         if( h.deleteMin( ) != i )
-             System.out.println( "Oops! " + i );
- }
+    /**
+     * Internal method to percolate down in the heap.
+     * @param hole the index at which the percolate begins.
+     */
+    private void percolateDown(int startIndex){
+        int firstChildIndex = startIndex*ary+1;
+        int lastChildIndex = (startIndex*ary + ary < currentSize) ?
+                startIndex*ary + ary : currentSize-1;
+        int smallest = startIndex;
+        for(int i = firstChildIndex; i < lastChildIndex; i++){
+            if(array[i].compareTo(array[smallest]) < 0){
+                smallest = i;
+            }
+        }
+        if(array[smallest].compareTo(array[startIndex]) < 0){
+            swap(smallest, startIndex);
+            percolateDown(smallest);
+        }
+    }
 }
