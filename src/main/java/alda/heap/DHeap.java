@@ -87,7 +87,7 @@ public class DHeap<AnyType extends Comparable<? super AnyType>>
  public AnyType findMin( )
  {
      if( isEmpty( ) )
-         throw new UnderflowException( );
+         throw new UnderflowException("isEmpty" );
      return array[ 1 ];
  }
 
@@ -98,7 +98,7 @@ public class DHeap<AnyType extends Comparable<? super AnyType>>
  public AnyType deleteMin( )
  {
      if( isEmpty( ) )
-         throw new UnderflowException( );
+         throw new UnderflowException("isEmpty" );
 
      AnyType minItem = findMin( );
      array[ 1 ] = array[ currentSize-- ];
