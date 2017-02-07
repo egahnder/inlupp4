@@ -100,6 +100,7 @@ public class DHeap<AnyType extends Comparable<? super AnyType>>
 
         AnyType minItem = findMin();
         array[0] = array[currentSize-1];
+        array[currentSize-1] = null;
         currentSize--;
         if(currentSize > 0){
             percolateDown(0);
@@ -163,7 +164,7 @@ public class DHeap<AnyType extends Comparable<? super AnyType>>
         int lastChildIndex = (startIndex*ary + ary < currentSize) ?
                 startIndex*ary + ary : currentSize-1;
         int smallest = startIndex;
-        for(int i = firstChildIndex; i < lastChildIndex; i++){
+        for(int i = firstChildIndex; i <= lastChildIndex; i++){
             if(array[i].compareTo(array[smallest]) < 0){
                 smallest = i;
             }
