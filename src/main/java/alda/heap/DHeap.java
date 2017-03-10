@@ -7,46 +7,65 @@ Eric Egan ereg8941
 
 package alda.heap;
 
-public class DHeap<AnyType extends Comparable<? super AnyType>>
-{
+public class DHeap<AnyType extends Comparable<? super AnyType>> {
     private static final int DEFAULT_ARY = 2;
+    private static final int ARRAY_MULTIPLIER = 2;
     private int ary = 0;
-    private int currentSize;      // Number of elements in heap
-    private AnyType [ ] array;
+    private int indexOfLastElement;      // Number of elements in heap
+    private AnyType[] internalArray;
 
-    public DHeap( )
-    {
+    public DHeap() {
         this(DEFAULT_ARY);
     }
 
-    public DHeap(int ary)
-    {
-        if(ary < 2){
+    public DHeap(int ary) {
+        if (ary < 2) {
             throw new IllegalArgumentException();
-        }
-        else{
-            currentSize = 0;
-            array = (AnyType[]) new Comparable[11];
+        } else {
+            indexOfLastElement = 0;
+            internalArray = (AnyType[]) new Comparable[ary];
             this.ary = ary;
         }
     }
 
 
-    public void insert( AnyType x ) {
+    public void insert(AnyType newElement) {
 
-        currentSize++;
-        if( currentSize == array.length - 1 )
-            enlargeArray( array.length * 2 + 1 );
+        indexOfLastElement++;
 
-
-        int parentIndex = (currentSize > 1) ? parentIndex(currentSize) : 1;
-        int childIndex = currentSize;
-        array[childIndex] = x;
-        while(parentIndex >= 1 && array[parentIndex].compareTo(array[childIndex]) > 0){
-            swap(parentIndex, childIndex);
-            childIndex = parentIndex;
-            parentIndex = (childIndex + ary - 2)/ary;
+        if (arrayIsFull()) {
+            enlargeArray();
         }
+
+        int parentIndex = getParentIndex(indexOfLastElement);
+
+        int childIndex = indexOfLastElement;
+
+        internalArray[childIndex] = newElement;
+
+        perculateUp(parentIndex, childIndex);
+    }
+
+    private boolean arrayIsFull() {
+        return indexOfLastElement == internalArray.length - 1;
+    }
+
+    private void perculateUp(int parentIndex, int childIndex) {
+        while (parentIndex >= 1 && internalArray[parentIndex].compareTo(internalArray[childIndex]) > 0) {
+            swapElement(parentIndex, childIndex);
+            childIndex = parentIndex;
+            parentIndex = getParentIndex(childIndex);
+        }
+    }
+
+    private void swapElement(int parent, int child) {
+        AnyType tmp = internalArray[parent];
+        internalArray[parent] = internalArray[child];
+        internalArray[child] = tmp;
+    }
+
+    private int getParentIndex(int childIndex) {
+        return (childIndex > 1) ? parentIndex(childIndex) : 1;
     }
 
     /**
@@ -57,101 +76,103 @@ public class DHeap<AnyType extends Comparable<? super AnyType>>
      * @throws IllegalArgumentException if parentIndex < 1
      */
 
-    public int firstChildIndex(int parentIndex){
-        if(parentIndex < 1){
+    public int firstChildIndex(int parentIndex) {
+        if (parentIndex < 1) {
             throw new IllegalArgumentException();
         }
-       return ((parentIndex - 1) * ary) + 2;
+        return ((parentIndex - 1) * ary) + 2;
 
     }
 
+    private int getLastChild(int firstChild) {
+        return ((firstChild + ary - 1) < indexOfLastElement) ? (firstChild + ary - 1) : indexOfLastElement;
+    }
 
-    public int parentIndex(int childIndex){
-        if(childIndex <= 1){
+
+    public int parentIndex(int childIndex) {
+        if (childIndex <= 1) {
             throw new IllegalArgumentException();
         }
 
-        return (childIndex + ary - 2)/ary;
+        return (childIndex + ary - 2) / ary;
     }
 
-    public AnyType findMin( )
-    {
-        if( isEmpty( ) )
-            throw new UnderflowException("isEmpty" );
-        return array[1];
+    public AnyType findMin() {
+        if (isEmpty()) {
+            throw new UnderflowException("isEmpty");
+        }
+
+        return internalArray[1];
     }
 
-    public AnyType deleteMin( )
-    {
-        if( isEmpty( ) )
-            throw new UnderflowException("isEmpty" );
+    public AnyType deleteMin() {
+        if (isEmpty())
+            throw new UnderflowException("isEmpty");
 
         AnyType minItem = findMin();
-        array[1] = array[currentSize];
-        array[currentSize] = null;
-        currentSize--;
-        if(currentSize > 1){
+        internalArray[1] = internalArray[indexOfLastElement];
+        internalArray[indexOfLastElement] = null;
+        indexOfLastElement--;
+
+        if (indexOfLastElement > 1) {
             percolateDown(1);
         }
+
         return minItem;
     }
 
-    private void percolateDown(int startIndex){
-        //int firstChildIndex = startIndex*ary+1;
-        //int firstChildIndex = ((startIndex - 1) * ary) + 2;
-        int firstChildIndex = firstChildIndex(startIndex);
+    private void percolateDown(int start) {
 
-        //int lastChildIndex = (startIndex*ary + ary < currentSize) ?
-          //      startIndex*ary + ary : currentSize-1;
-        int lastChildIndex = ((firstChildIndex + ary - 1) < currentSize) ? (firstChildIndex + ary - 1) : currentSize;
+        boolean shouldPerculateDown = false;
 
-        int smallest = startIndex;
-        for(int i = firstChildIndex; i <= lastChildIndex; i++){
-            if(array[i].compareTo(array[smallest]) < 0){
-                smallest = i;
+        int firstChild = firstChildIndex(start);
+
+        int lastChild = getLastChild(firstChild);
+
+        int indexOfMovedElement = start;
+
+        for (int i = firstChild; i <= lastChild; i++) {
+            if (internalArray[i].compareTo(internalArray[indexOfMovedElement]) < 0) {
+                shouldPerculateDown = true;
+                indexOfMovedElement = i;
             }
         }
-        if(array[smallest].compareTo(array[startIndex]) < 0){
-            swap(smallest, startIndex);
-            percolateDown(smallest);
+
+        if (shouldPerculateDown) {
+            swapElement(indexOfMovedElement, start);
+            percolateDown(indexOfMovedElement);
         }
     }
 
 
-    public boolean isEmpty( )
-    {
-        return currentSize == 0;
+    public boolean isEmpty() {
+        return indexOfLastElement == 0;
     }
 
-    public int size(){
-        return currentSize;
+    public int size() {
+        return indexOfLastElement;
     }
 
-    public AnyType get(int index){ return array[index]; }
-
-    private void swap(int first, int second){
-        AnyType tmp = array[first];
-        array[first] = array[second];
-        array[second] = tmp;
-    }
-
-    private void enlargeArray( int newSize )
-    {
-        AnyType [] old = array;
-        array = (AnyType []) new Comparable[ newSize ];
-        for( int i = 1; i < old.length; i++ )
-            array[ i ] = old[ i ];
+    public AnyType get(int index) {
+        return internalArray[index];
     }
 
 
+    private void enlargeArray() {
+        AnyType[] oldInternalArray = internalArray;
+        internalArray = (AnyType[]) new Comparable[internalArray.length * ARRAY_MULTIPLIER];
+        System.arraycopy(oldInternalArray, 0, internalArray, 0, oldInternalArray.length);
 
-    public void makeEmpty( )
-    {
-        currentSize = 0;
     }
 
 
-
-    public static void main( String [ ] args ) {
+    public void makeEmpty() {
+        indexOfLastElement = 0;
     }
+
+
+    public static void main(String[] args) {
+
+    }
+
 }
